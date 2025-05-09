@@ -9,7 +9,9 @@ export default function HomePage() {
   const { language } = useAppStore();
 
   const navigateToSearch = () => {
-    router.push('/search');
+    router.push({
+      pathname: '/search'
+    });
   };
 
   const navigateToSchedule = () => {
