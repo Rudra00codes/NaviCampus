@@ -132,14 +132,6 @@ src/
 
 </details>
 
-## 👥 Team Members
-
-| Name | Role | Responsibilities |
-|------|------|-----------------|
-| 👨‍💻 Rudra Pratap Singh | Team Lead & Full-Stack Developer | Project architecture, core functionality implementation |
-| 🎨 [Team Member 2] | UI/UX Designer | Interface design, user experience, accessibility |
-| 🔧 [Team Member 3] | Backend Developer | Services integration, data modeling |
-| 📱 [Team Member 4] | Mobile Developer | Cross-platform implementation, testing |
 
 ## 🚀 Getting Started
 
