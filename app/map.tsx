@@ -12,101 +12,23 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useAppStore } from '../src/store/appStore';
 import { campusLocations } from '../src/services/campusDataService';
-
-// Mock components for map view - in a real app, you would use react-native-maps
-// and other navigation libraries
-const MapPlaceholder = () => {
-  const [selectedFloor, setSelectedFloor] = useState(1);
-  
-  return (
-    <View style={styles.mapContainer}>
-      <View style={styles.mapPlaceholder}>
-        <Text style={styles.mapPlaceholderText}>Campus Map</Text>
-        <Ionicons name="map" size={64} color="#A1A1AA" />
-        <Text style={styles.mapPlaceholderSubtext}>
-          Map data would be displayed here using Google Maps API
-        </Text>
-      </View>
-      
-      {/* Floor selector for indoor navigation */}
-      <View style={styles.floorSelector}>
-        <TouchableOpacity 
-          style={[
-            styles.floorButton, 
-            selectedFloor === 3 && styles.floorButtonActive
-          ]}
-          onPress={() => setSelectedFloor(3)}
-        >
-          <Text style={[
-            styles.floorButtonText,
-            selectedFloor === 3 && styles.floorButtonTextActive
-          ]}>3F</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[
-            styles.floorButton, 
-            selectedFloor === 2 && styles.floorButtonActive
-          ]}
-          onPress={() => setSelectedFloor(2)}
-        >
-          <Text style={[
-            styles.floorButtonText,
-            selectedFloor === 2 && styles.floorButtonTextActive
-          ]}>2F</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[
-            styles.floorButton, 
-            selectedFloor === 1 && styles.floorButtonActive
-          ]}
-          onPress={() => setSelectedFloor(1)}
-        >
-          <Text style={[
-            styles.floorButtonText,
-            selectedFloor === 1 && styles.floorButtonTextActive
-          ]}>1F</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={[
-            styles.floorButton, 
-            selectedFloor === 0 && styles.floorButtonActive
-          ]}
-          onPress={() => setSelectedFloor(0)}
-        >
-          <Text style={[
-            styles.floorButtonText,
-            selectedFloor === 0 && styles.floorButtonTextActive
-          ]}>G</Text>
-        </TouchableOpacity>
-      </View>
-      
-      {/* Map controls */}
-      <View style={styles.mapControls}>
-        <TouchableOpacity style={styles.mapControlButton}>
-          <Ionicons name="locate" size={24} color="#3B82F6" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.mapControlButton}>
-          <Ionicons name="compass" size={24} color="#3B82F6" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.mapControlButton}>
-          <Ionicons name="add" size={24} color="#3B82F6" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.mapControlButton}>
-          <Ionicons name="remove" size={24} color="#3B82F6" />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-};
 
 export default function MapScreen() {
   const { language } = useAppStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [showInfoPanel, setShowInfoPanel] = useState(true);
   const [mode, setMode] = useState<'outdoor' | 'indoor'>('outdoor');
-  
+  const [selectedFloor, setSelectedFloor] = useState(1);
+  const [region, setRegion] = useState({
+    latitude: 28.5456, // Default coordinates (adjust to your campus)
+    longitude: 77.2732,
+    latitudeDelta: 0.005,
+    longitudeDelta: 0.005,
+  });
+
   const toggleMode = () => {
     setMode(mode === 'outdoor' ? 'indoor' : 'outdoor');
   };
@@ -125,6 +47,75 @@ export default function MapScreen() {
       pathname: `/location/${id}`,
       params: { id }
     });
+  };
+
+  // Indoor map component that will replace the MapView when in indoor mode
+  const IndoorMapView = () => {
+    return (
+      <View style={styles.mapContainer}>
+        <View style={styles.mapPlaceholder}>
+          <Text style={styles.mapPlaceholderText}>Indoor Map</Text>
+          <Ionicons name="business" size={64} color="#A1A1AA" />
+          <Text style={styles.mapPlaceholderSubtext}>
+            {language === 'en' 
+              ? 'Indoor mapping using Wi-Fi positioning' 
+              : 'वाई-फाई पोजिशनिंग का उपयोग करके इनडोर मैपिंग'}
+          </Text>
+        </View>
+        
+        {/* Floor selector */}
+        <View style={styles.floorSelector}>
+          <TouchableOpacity 
+            style={[
+              styles.floorButton, 
+              selectedFloor === 3 && styles.floorButtonActive
+            ]}
+            onPress={() => setSelectedFloor(3)}
+          >
+            <Text style={[
+              styles.floorButtonText,
+              selectedFloor === 3 && styles.floorButtonTextActive
+            ]}>3F</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[
+              styles.floorButton, 
+              selectedFloor === 2 && styles.floorButtonActive
+            ]}
+            onPress={() => setSelectedFloor(2)}
+          >
+            <Text style={[
+              styles.floorButtonText,
+              selectedFloor === 2 && styles.floorButtonTextActive
+            ]}>2F</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[
+              styles.floorButton, 
+              selectedFloor === 1 && styles.floorButtonActive
+            ]}
+            onPress={() => setSelectedFloor(1)}
+          >
+            <Text style={[
+              styles.floorButtonText,
+              selectedFloor === 1 && styles.floorButtonTextActive
+            ]}>1F</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[
+              styles.floorButton, 
+              selectedFloor === 0 && styles.floorButtonActive
+            ]}
+            onPress={() => setSelectedFloor(0)}
+          >
+            <Text style={[
+              styles.floorButtonText,
+              selectedFloor === 0 && styles.floorButtonTextActive
+            ]}>G</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
   };
   
   return (
@@ -172,8 +163,65 @@ export default function MapScreen() {
         )}
       </View>
       
-      {/* Map View */}
-      <MapPlaceholder />
+      {/* Map View - Conditionally render based on mode */}
+      {mode === 'outdoor' ? (
+        <View style={styles.mapContainer}>
+          <MapView 
+            style={styles.map}
+            provider={PROVIDER_GOOGLE}
+            initialRegion={region}
+            region={region}
+          >
+            {campusLocations.map((location) => (
+              <Marker
+                key={location.id}
+                coordinate={{
+                  latitude: location.coordinates.latitude,
+                  longitude: location.coordinates.longitude,
+                }}
+                title={location.name}
+                description={location.description}
+                onPress={() => navigateToLocation(location.id)}
+              />
+            ))}
+          </MapView>
+          
+          {/* Map controls */}
+          <View style={styles.mapControls}>
+            <TouchableOpacity 
+              style={styles.mapControlButton}
+              onPress={() => setRegion({...region})}
+            >
+              <Ionicons name="locate" size={24} color="#3B82F6" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.mapControlButton}>
+              <Ionicons name="compass" size={24} color="#3B82F6" />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.mapControlButton}
+              onPress={() => setRegion({
+                ...region,
+                latitudeDelta: region.latitudeDelta / 1.5,
+                longitudeDelta: region.longitudeDelta / 1.5,
+              })}
+            >
+              <Ionicons name="add" size={24} color="#3B82F6" />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.mapControlButton}
+              onPress={() => setRegion({
+                ...region,
+                latitudeDelta: region.latitudeDelta * 1.5,
+                longitudeDelta: region.longitudeDelta * 1.5,
+              })}
+            >
+              <Ionicons name="remove" size={24} color="#3B82F6" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      ) : (
+        <IndoorMapView />
+      )}
       
       {/* Bottom Information Panel */}
       {showInfoPanel && (
@@ -318,6 +366,9 @@ const styles = StyleSheet.create({
   mapContainer: {
     flex: 1,
     position: 'relative',
+  },
+  map: {
+    ...StyleSheet.absoluteFillObject,
   },
   mapPlaceholder: {
     flex: 1,
