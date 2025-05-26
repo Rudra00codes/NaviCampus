@@ -13,12 +13,40 @@ By combining Google Maps integration for outdoor navigation with Wi-Fi triangula
 
 ## 🏆 Key Features
 
-- **🔍 Real-Time Room Search**: Intuitive search functionality for classrooms, labs, offices, and other campus facilities with detailed information about each location.
-- **🧭 Indoor/Outdoor Navigation**: Seamless transition between outdoor navigation using Google Maps API and indoor positioning using Wi-Fi triangulation.
-- **📅 Integrated Class Scheduling**: Integration with university academic schedules to provide real-time room availability and booking information.
-- **🌐 Multilingual Support**: Full support for English and Hindi interfaces to cater to India's diverse student population.
-- **📲 Location-Based Notifications**: Context-aware notifications for class reminders, campus events, and emergency alerts based on user location.
-- **♿ Accessibility Features**: Adherence to accessibility standards including screen reader support, high contrast mode, and customizable text sizes.
+### ✅ Implemented Features
+- **📅 Smart Class Scheduling**: 
+  - Interactive timetable grid with Monday-Friday, 7-period support
+  - Period management (9:15 AM - 5:00 PM with lunch 12:15-1:15 PM)
+  - Add/Edit/Delete classes with conflict detection
+  - Visual week/day view with seamless transitions
+  - Location linking preparation for map integration
+- **🌐 Multilingual Support**: 
+  - Full English and Hindi interface implementation
+  - Context-aware translations for schedule features
+  - Localized time and date formatting
+- **💾 Data Management**: 
+  - Persistent storage using AsyncStorage
+  - Schedule data persistence with Zustand
+  - User preferences and settings management
+
+### 🔄 In Progress
+- **🧭 Map Integration**: 
+  - Map markers for key campus locations (60% complete)
+  - Indoor/outdoor mode toggle implementation (45% complete)
+  - Location services setup (40% complete)
+- **🔍 Location Features**: 
+  - Schedule-to-location linking (70% complete)
+  - Room search functionality (65% complete)
+  - Building information display (55% complete)
+- **💫 UI Enhancements**: 
+  - Loading indicators implementation (50% complete)
+  - Transition animations (45% complete)
+  - Accessibility improvements (40% complete)
+
+### 📅 Planned Features
+- **📲 Location-Based Alerts**: Smart notifications for class reminders and campus events
+- **♿ Accessibility Features**: Screen reader support, high contrast mode, and text size options
+- **🔌 Offline Support**: Full offline functionality with data caching
 
 ## 🛠️ Software Architecture
 
@@ -141,8 +169,18 @@ src/
 ### Prerequisites
 - [Node.js](https://nodejs.org/) (v18 or higher)
 - [npm](https://www.npmjs.com/) (v9 or higher)
-- [Expo CLI](https://docs.expo.dev/get-started/installation/)
+- [Expo CLI](https://docs.expo.dev/get-started/installation/) (v53.0.9)
 - [Expo Go](https://expo.dev/client) app on your iOS or Android device (for testing)
+
+### Dependencies
+```json
+{
+  "expo": "53.0.9",
+  "expo-router": "5.0.7",
+  "react": "19.0.0",
+  "react-native": "0.79.2"
+}
+```
 
 ### Installation
 
@@ -189,10 +227,14 @@ The map screen allows for seamless navigation around campus:
 - Enable Wi-Fi for precise indoor positioning
 
 #### 📅 Class Schedule
-The schedule screen helps track academic commitments:
-- View daily and weekly class schedules
-- Navigate to classroom locations directly
-- Get real-time availability information
+The schedule screen provides comprehensive timetable management:
+- Input and manage your weekly class schedule
+- Seven periods per day (9:15 AM - 5:00 PM)
+- Automatic lunch break (12:15-1:15 PM)
+- Toggle between day and week views
+- Edit or delete classes with tap and long-press
+- Smart conflict detection for overlapping classes
+- Seamless bilingual support (English/Hindi)
 
 #### ⚙️ Settings
 The settings screen offers customization options:
@@ -215,13 +257,42 @@ The settings screen offers customization options:
 
 ## 🎯 Development Roadmap
 
-| Phase | Features | Status |
-|-------|----------|--------|
-| MVP | Basic navigation, location search, campus map | ✅ Completed |
-| Phase 1 | Schedule integration, bookmarking, basic settings | ✅ Completed |
-| Phase 2 | Indoor navigation, multilingual support, accessibility | 🔄 In Progress |
-| Phase 3 | Location-based notifications, real-time updates | 📅 Planned |
-| Phase 4 | User profiles, social features, event integration | 📅 Planned |
+| Phase | Features | Status | Progress |
+|-------|----------|--------|----------|
+| MVP | Basic navigation system setup | ✅ Complete | 100% |
+| Phase 1 | Schedule input & management | ✅ Complete | 100% |
+| Phase 2 | Location search & bookmarking | 🔄 In Progress | 75% |
+| Phase 3 | Map integration & navigation | 🔄 In Progress | 50% |
+| Phase 4 | UI polish & offline support | 🔄 In Progress | 40% |
+| Phase 5 | Location-based notifications | 📅 Planned | - |
+| Phase 6 | User profiles & social features | 📅 Planned | - |
+
+### Current Sprint (as of May 26, 2025)
+- **✅ Completed**:
+  - Interactive timetable grid implementation
+  - Seven-period system with lunch break handling
+  - Comprehensive schedule CRUD operations
+  - Conflict detection and validation
+  - Bilingual interface with full translations
+  - Schedule data persistence
+  - Visual day/week view transitions
+  - Form validation and error handling
+
+- **🔄 In Progress**:
+  - Campus location data integration
+  - Map markers and location services
+  - Schedule-to-location linking system
+  - Loading state indicators
+  - UI polish and transitions
+  - Indoor/outdoor navigation toggle
+
+- **⏱️ Up Next**:
+  - Offline data synchronization
+  - Location-based notifications
+  - Extended bookmark functionality
+  - Search history optimization
+  - Campus event integration
+  - Advanced accessibility features
 
 ## 📄 License
 

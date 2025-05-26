@@ -20,7 +20,9 @@ Last Updated: May 21, 2025
 - [ ] Test indoor/outdoor mode toggle
 
 ### 3. Schedule Enhancements
-- [ ] Add sample course schedules for demonstration
+- [x] Add comprehensive timetable input system for student schedules
+- [x] Support for 7 periods (9:15 AM - 5:00 PM) with lunch break (12:15-1:15 PM)
+- [x] Monday-Friday schedule support with add/edit/delete functionality
 - [ ] Link schedule items to map locations
 - [ ] Verify day/week view transitions
 
