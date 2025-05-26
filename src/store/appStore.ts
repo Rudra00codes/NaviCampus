@@ -66,7 +66,10 @@ type AppState = {
   markNotificationAsRead: (id: string) => void;
   clearNotifications: () => void;
   addRecentSearch: (query: string) => void;
-  clearRecentSearches: () => void;
+  clearRecentSearches: () => void;  addClassSchedule: (schedule: Omit<ClassSchedule, 'id'>) => void;
+  removeClassSchedule: (id: string) => void;
+  updateClassSchedule: (id: string, schedule: Partial<ClassSchedule>) => void;
+  clearAllClassSchedules: () => void;
 };
 
 // Create the store with persistence
@@ -131,6 +134,27 @@ export const useAppStore = create<AppState>()(
       })),
       
       clearRecentSearches: () => set({ recentSearches: [] }),
+      
+      addClassSchedule: (schedule) => set((state) => ({
+        classSchedule: [
+          ...state.classSchedule,
+          {
+            ...schedule,
+            id: Date.now().toString(),
+          },
+        ],
+      })),
+        removeClassSchedule: (id) => set((state) => ({
+        classSchedule: state.classSchedule.filter((schedule) => schedule.id !== id),
+      })),
+      
+      updateClassSchedule: (id, updates) => set((state) => ({
+        classSchedule: state.classSchedule.map((schedule) =>
+          schedule.id === id ? { ...schedule, ...updates } : schedule
+        ),
+      })),
+      
+      clearAllClassSchedules: () => set({ classSchedule: [] }),
     }),
     {
       name: 'navicampus-storage',

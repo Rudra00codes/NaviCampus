@@ -6,16 +6,18 @@ import {
   TouchableOpacity, 
   ScrollView,
   Platform,
-  Dimensions
+  Dimensions,
+  Modal
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppStore } from '../src/store/appStore';
 import { classSchedules, getLocationById } from '../src/services/campusDataService';
+import TimetableInput from '../src/components/TimetableInput';
 
 export default function ScheduleScreen() {
-  const { language } = useAppStore();
+  const { language, classSchedule: userClassSchedule } = useAppStore();
   const daysOfWeek = language === 'en' 
     ? ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
     : ['रविवार', 'सोमवार', 'मंगलवार', 'बुधवार', 'गुरुवार', 'शुक्रवार', 'शनिवार'];
@@ -27,23 +29,22 @@ export default function ScheduleScreen() {
   const today = new Date().getDay(); // 0 = Sunday, 1 = Monday, etc.
   const [selectedDay, setSelectedDay] = useState(today);
   const [view, setView] = useState<'week' | 'day'>('day');
+  const [showTimetableInput, setShowTimetableInput] = useState(false);
+  
+  // Combine user schedules with demo schedules for display
+  const allSchedules = [...classSchedules, ...userClassSchedule];
   
   // Get class schedules for the selected day
   const getSchedulesForDay = (day: number) => {
-    return classSchedules.filter(schedule => schedule.dayOfWeek === day)
+    return allSchedules.filter(schedule => schedule.dayOfWeek === day)
       .sort((a, b) => a.startTime.localeCompare(b.startTime));
   };
-  
-  const navigateToLocation = (locationId: string) => {
-    router.push({
-      pathname: `/location/${locationId}`,
-      params: { id: locationId }
-    });
+    const navigateToLocation = (locationId: string) => {
+    router.push(`/location/${locationId}` as any);
   };
-  
-  // Find location ID for a classroom
+    // Find location ID for a classroom
   const findLocationIdForClass = (schedule: { room: string, building: string }) => {
-    const location = classSchedules.find(
+    const location = allSchedules.find(
       loc => loc.room === schedule.room && loc.building === schedule.building
     );
     if (location) {
@@ -231,13 +232,22 @@ export default function ScheduleScreen() {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>
           {language === 'en' ? 'Class Schedule' : 'कक्षा कार्यक्रम'}
-        </Text>
-        <TouchableOpacity 
+        </Text>        <TouchableOpacity 
           style={styles.viewToggleButton}
           onPress={() => setView(view === 'day' ? 'week' : 'day')}
         >
           <Ionicons 
             name={view === 'day' ? "calendar" : "list"} 
+            size={24} 
+            color="#3B82F6" 
+          />
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.addScheduleButton}
+          onPress={() => setShowTimetableInput(true)}
+        >
+          <Ionicons 
+            name="add" 
             size={24} 
             color="#3B82F6" 
           />
@@ -278,10 +288,18 @@ export default function ScheduleScreen() {
           
           {/* Schedule list for selected day */}
           {renderDaySchedule(selectedDay)}
-        </>
-      ) : (
+        </>      ) : (
         renderWeekView()
       )}
+      
+      {/* Timetable Input Modal */}
+      <Modal
+        visible={showTimetableInput}
+        animationType="slide"
+        presentationStyle="fullScreen"
+      >
+        <TimetableInput onClose={() => setShowTimetableInput(false)} />
+      </Modal>
     </View>
   );
 }
@@ -312,9 +330,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#111827',
     textAlign: 'center',
-  },
-  viewToggleButton: {
+  },  viewToggleButton: {
     padding: 8,
+  },
+  addScheduleButton: {
+    padding: 8,
+    marginLeft: 8,
   },
   daySelector: {
     backgroundColor: '#FFFFFF',
