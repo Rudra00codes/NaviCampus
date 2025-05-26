@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   View, 
   Text, 
@@ -7,27 +7,465 @@ import {
   ScrollView,
   Switch,
   Platform,
-  Linking,
-  Alert
+  Image,
+  Alert,
+  Modal,
+  TextInput,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppStore } from '../src/store/appStore';
+import AuthScreen from '../src/components/AuthScreen';
 
-export default function SettingsScreen() {
+export default function AccountScreen() {
   const { 
     language, 
     setLanguage, 
     darkMode, 
     toggleDarkMode,
     clearRecentSearches,
-    clearNotifications
+    clearNotifications,
+    isAuthenticated,
+    user,
+    logout,
+    updateUser,
   } = useAppStore();
+
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editField, setEditField] = useState<string>('');
+  const [editValue, setEditValue] = useState<string>('');
+
+  const theme = {
+    background: darkMode ? '#121212' : '#FFFFFF',
+    surface: darkMode ? '#1E1E1E' : '#F9FAFB',
+    primary: '#4F46E5',
+    text: darkMode ? '#FFFFFF' : '#111827',
+    textSecondary: darkMode ? '#A1A1AA' : '#6B7280',
+    border: darkMode ? '#374151' : '#D1D5DB',
+    card: darkMode ? '#1F2937' : '#FFFFFF',
+  };
+
+  const texts = {
+    en: {
+      account: 'Account',
+      profile: 'Profile',
+      settings: 'Settings',
+      language: 'Language',
+      appLanguage: 'App Language',
+      appearance: 'Appearance',
+      darkMode: 'Dark Mode',
+      switchTheme: 'Switch between light and dark theme',
+      notifications: 'Notifications',
+      pushNotifications: 'Push Notifications',
+      classReminders: 'Receive alerts for class reminders and events',
+      locationServices: 'Location Services',
+      locationAlerts: 'Enable for location-based notifications',
+      dataManagement: 'Data Management',
+      clearSearchHistory: 'Clear Search History',
+      removeSearches: 'Remove all recent searches',
+      clearNotifications: 'Clear Notifications',
+      removeNotifications: 'Remove all notifications',
+      aboutSupport: 'About & Support',
+      aboutApp: 'About NaviCampus',
+      version: 'Version 1.0.0',
+      helpSupport: 'Help & Support',
+      contactUs: 'Contact us for assistance',
+      signOut: 'Sign Out',
+      signOutConfirm: 'Are you sure you want to sign out?',
+      cancel: 'Cancel',
+      confirm: 'Sign Out',
+      edit: 'Edit',
+      save: 'Save',
+      studentInfo: 'Student Information',
+      contactInfo: 'Contact Information',
+      emergencyContact: 'Emergency Contact',
+      academicInfo: 'Academic Information',
+    },
+    hi: {
+      account: 'खाता',
+      profile: 'प्रोफ़ाइल',
+      settings: 'सेटिंग्स',
+      language: 'भाषा',
+      appLanguage: 'ऐप भाषा',
+      appearance: 'दिखावट',
+      darkMode: 'डार्क मोड',
+      switchTheme: 'लाइट और डार्क थीम के बीच स्विच करें',
+      notifications: 'सूचनाएँ',
+      pushNotifications: 'पुश नोटिफिकेशन',
+      classReminders: 'कक्षा अनुस्मारक और घटनाओं के लिए अलर्ट प्राप्त करें',
+      locationServices: 'स्थान सेवाएँ',
+      locationAlerts: 'स्थान-आधारित सूचनाओं के लिए सक्षम करें',
+      dataManagement: 'डेटा प्रबंधन',
+      clearSearchHistory: 'खोज इतिहास साफ़ करें',
+      removeSearches: 'सभी हालिया खोजें हटाएं',
+      clearNotifications: 'सूचनाएं साफ़ करें',
+      removeNotifications: 'सभी सूचनाएं हटाएं',
+      aboutSupport: 'जानकारी और समर्थन',
+      aboutApp: 'नेविकैंपस के बारे में',
+      version: 'संस्करण 1.0.0',
+      helpSupport: 'सहायता और समर्थन',
+      contactUs: 'सहायता के लिए हमसे संपर्क करें',
+      signOut: 'साइन आउट',
+      signOutConfirm: 'क्या आप वाकई साइन आउट करना चाहते हैं?',
+      cancel: 'रद्द करें',
+      confirm: 'साइन आउट',
+      edit: 'संपादित करें',
+      save: 'सेव करें',
+      studentInfo: 'छात्र जानकारी',
+      contactInfo: 'संपर्क जानकारी',
+      emergencyContact: 'आपातकालीन संपर्क',
+      academicInfo: 'शैक्षणिक जानकारी',
+    },
+  };
+
+  const t = texts[language];
+
+  if (!isAuthenticated) {
+    return <AuthScreen />;
+  }
 
   const handleLanguageToggle = () => {
     setLanguage(language === 'en' ? 'hi' : 'en');
   };
+
+  const handleSignOut = () => {
+    Alert.alert(
+      t.signOut,
+      t.signOutConfirm,
+      [
+        { text: t.cancel, style: 'cancel' },
+        { 
+          text: t.confirm, 
+          style: 'destructive',
+          onPress: logout 
+        },
+      ]
+    );
+  };
+
+  const openEditModal = (field: string, currentValue: string) => {
+    setEditField(field);
+    setEditValue(currentValue);
+    setEditModalVisible(true);
+  };
+
+  const saveEdit = () => {
+    if (user && editField && editValue.trim()) {
+      updateUser({ [editField]: editValue.trim() });
+      setEditModalVisible(false);
+      setEditField('');
+      setEditValue('');
+    }
+  };
+
+  const ProfileHeader = () => (
+    <View style={[styles.profileHeader, { backgroundColor: theme.card }]}>
+      <View style={styles.profileImageContainer}>
+        {user?.profilePhoto ? (
+          <Image source={{ uri: user.profilePhoto }} style={styles.profileImage} />
+        ) : (
+          <View style={[styles.profileImagePlaceholder, { backgroundColor: theme.primary }]}>
+            <Text style={styles.profileImageText}>
+              {user?.name.charAt(0).toUpperCase()}
+            </Text>
+          </View>
+        )}
+      </View>
+      <View style={styles.profileInfo}>
+        <Text style={[styles.profileName, { color: theme.text }]}>{user?.name}</Text>
+        <Text style={[styles.profileRoll, { color: theme.textSecondary }]}>{user?.rollNumber}</Text>
+        <Text style={[styles.profileCourse, { color: theme.textSecondary }]}>
+          {user?.course} - {user?.branch}
+        </Text>
+        <Text style={[styles.profileSemester, { color: theme.primary }]}>
+          Semester {user?.semester} • Year {user?.year}
+        </Text>
+      </View>
+    </View>
+  );
+
+  return (
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <StatusBar style={darkMode ? "light" : "dark"} />
+      
+      {/* Header */}
+      <View style={[styles.header, { backgroundColor: theme.card }]}>
+        <Text style={[styles.headerTitle, { color: theme.text }]}>
+          {t.account}
+        </Text>
+      </View>
+      
+      <ScrollView style={styles.content}>
+        {/* Profile Header */}
+        <ProfileHeader />
+
+        {/* Student Information */}
+        <View style={[styles.section, { backgroundColor: theme.card }]}>
+          <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>{t.studentInfo}</Text>
+          
+          <TouchableOpacity 
+            style={styles.infoItem}
+            onPress={() => openEditModal('name', user?.name || '')}
+          >
+            <View style={styles.infoItemLeft}>
+              <Ionicons name="person" size={20} color={theme.primary} style={styles.infoIcon} />
+              <View style={styles.infoTextContainer}>
+                <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Full Name</Text>
+                <Text style={[styles.infoValue, { color: theme.text }]}>{user?.name}</Text>
+              </View>
+            </View>
+            <Ionicons name="pencil" size={16} color={theme.textSecondary} />
+          </TouchableOpacity>
+
+          <View style={styles.infoItem}>
+            <View style={styles.infoItemLeft}>
+              <Ionicons name="id-card" size={20} color={theme.primary} style={styles.infoIcon} />
+              <View style={styles.infoTextContainer}>
+                <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Roll Number</Text>
+                <Text style={[styles.infoValue, { color: theme.text }]}>{user?.rollNumber}</Text>
+              </View>
+            </View>
+          </View>
+
+          <TouchableOpacity 
+            style={styles.infoItem}
+            onPress={() => openEditModal('email', user?.email || '')}
+          >
+            <View style={styles.infoItemLeft}>
+              <Ionicons name="mail" size={20} color={theme.primary} style={styles.infoIcon} />
+              <View style={styles.infoTextContainer}>
+                <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Email</Text>
+                <Text style={[styles.infoValue, { color: theme.text }]}>{user?.email}</Text>
+              </View>
+            </View>
+            <Ionicons name="pencil" size={16} color={theme.textSecondary} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Academic Information */}
+        <View style={[styles.section, { backgroundColor: theme.card }]}>
+          <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>{t.academicInfo}</Text>
+          
+          <View style={styles.infoItem}>
+            <View style={styles.infoItemLeft}>
+              <Ionicons name="school" size={20} color={theme.primary} style={styles.infoIcon} />
+              <View style={styles.infoTextContainer}>
+                <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Course</Text>
+                <Text style={[styles.infoValue, { color: theme.text }]}>{user?.course}</Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.infoItem}>
+            <View style={styles.infoItemLeft}>
+              <Ionicons name="library" size={20} color={theme.primary} style={styles.infoIcon} />
+              <View style={styles.infoTextContainer}>
+                <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Branch</Text>
+                <Text style={[styles.infoValue, { color: theme.text }]}>{user?.branch}</Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.infoItem}>
+            <View style={styles.infoItemLeft}>
+              <Ionicons name="calendar" size={20} color={theme.primary} style={styles.infoIcon} />
+              <View style={styles.infoTextContainer}>
+                <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Current Semester</Text>
+                <Text style={[styles.infoValue, { color: theme.text }]}>Semester {user?.semester}</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Contact Information */}
+        {user?.phone && (
+          <View style={[styles.section, { backgroundColor: theme.card }]}>
+            <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>{t.contactInfo}</Text>
+            
+            <TouchableOpacity 
+              style={styles.infoItem}
+              onPress={() => openEditModal('phone', user?.phone || '')}
+            >
+              <View style={styles.infoItemLeft}>
+                <Ionicons name="call" size={20} color={theme.primary} style={styles.infoIcon} />
+                <View style={styles.infoTextContainer}>
+                  <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Phone</Text>
+                  <Text style={[styles.infoValue, { color: theme.text }]}>{user?.phone}</Text>
+                </View>
+              </View>
+              <Ionicons name="pencil" size={16} color={theme.textSecondary} />
+            </TouchableOpacity>
+
+            {user?.address && (
+              <TouchableOpacity 
+                style={styles.infoItem}
+                onPress={() => openEditModal('address', user?.address || '')}
+              >
+                <View style={styles.infoItemLeft}>
+                  <Ionicons name="location" size={20} color={theme.primary} style={styles.infoIcon} />
+                  <View style={styles.infoTextContainer}>
+                    <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Address</Text>
+                    <Text style={[styles.infoValue, { color: theme.text }]}>{user?.address}</Text>
+                  </View>
+                </View>
+                <Ionicons name="pencil" size={16} color={theme.textSecondary} />
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+
+        {/* App Settings */}
+        <View style={[styles.section, { backgroundColor: theme.card }]}>
+          <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>{t.settings}</Text>
+          
+          <View style={styles.settingItem}>
+            <View style={styles.settingItemLeft}>
+              <Ionicons name="language" size={20} color={theme.primary} style={styles.settingIcon} />
+              <View style={styles.settingTextContainer}>
+                <Text style={[styles.settingLabel, { color: theme.text }]}>{t.appLanguage}</Text>
+                <Text style={[styles.settingValue, { color: theme.primary }]}>
+                  {language === 'en' ? 'English' : 'हिंदी'}
+                </Text>
+              </View>
+            </View>
+            
+            <TouchableOpacity
+              style={[
+                styles.languageToggle, 
+                language === 'hi' && styles.languageToggleActive
+              ]}
+              onPress={handleLanguageToggle}
+              activeOpacity={0.7}
+            >
+              <View style={[
+                styles.languageToggleThumb,
+                language === 'hi' && styles.languageToggleThumbRight
+              ]}>
+                <Text style={styles.languageToggleText}>
+                  {language === 'en' ? 'हिं' : 'EN'}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.settingItem}>
+            <View style={styles.settingItemLeft}>
+              <Ionicons name="moon" size={20} color={theme.primary} style={styles.settingIcon} />
+              <View style={styles.settingTextContainer}>
+                <Text style={[styles.settingLabel, { color: theme.text }]}>{t.darkMode}</Text>
+                <Text style={[styles.settingDescription, { color: theme.textSecondary }]}>
+                  {t.switchTheme}
+                </Text>
+              </View>
+            </View>
+            
+            <Switch
+              value={darkMode}
+              onValueChange={toggleDarkMode}
+              trackColor={{ false: '#D1D5DB', true: '#818CF8' }}
+              thumbColor={darkMode ? '#4F46E5' : '#F9FAFB'}
+              ios_backgroundColor="#D1D5DB"
+            />
+          </View>
+        </View>
+
+        {/* Data Management */}
+        <View style={[styles.section, { backgroundColor: theme.card }]}>
+          <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>{t.dataManagement}</Text>
+          
+          <TouchableOpacity 
+            style={styles.settingItem}
+            onPress={clearRecentSearches}
+          >
+            <View style={styles.settingItemLeft}>
+              <Ionicons name="time" size={20} color={theme.primary} style={styles.settingIcon} />
+              <View style={styles.settingTextContainer}>
+                <Text style={[styles.settingLabel, { color: theme.text }]}>{t.clearSearchHistory}</Text>
+                <Text style={[styles.settingDescription, { color: theme.textSecondary }]}>
+                  {t.removeSearches}
+                </Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.settingItem}
+            onPress={clearNotifications}
+          >
+            <View style={styles.settingItemLeft}>
+              <Ionicons name="notifications-off" size={20} color={theme.primary} style={styles.settingIcon} />
+              <View style={styles.settingTextContainer}>
+                <Text style={[styles.settingLabel, { color: theme.text }]}>{t.clearNotifications}</Text>
+                <Text style={[styles.settingDescription, { color: theme.textSecondary }]}>
+                  {t.removeNotifications}
+                </Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* Sign Out */}
+        <View style={[styles.section, { backgroundColor: theme.card }]}>
+          <TouchableOpacity 
+            style={styles.signOutItem}
+            onPress={handleSignOut}
+          >
+            <Ionicons name="log-out" size={20} color="#EF4444" style={styles.settingIcon} />
+            <Text style={[styles.signOutText, { color: '#EF4444' }]}>{t.signOut}</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+
+      {/* Edit Modal */}
+      <Modal
+        visible={editModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>
+              {t.edit} {editField}
+            </Text>
+            
+            <TextInput
+              style={[styles.modalInput, { 
+                backgroundColor: theme.surface, 
+                borderColor: theme.border,
+                color: theme.text 
+              }]}
+              value={editValue}
+              onChangeText={setEditValue}
+              placeholder={`Enter ${editField}`}
+              placeholderTextColor={theme.textSecondary}
+              multiline={editField === 'address'}
+            />
+            
+            <View style={styles.modalButtons}>
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.cancelButton, { borderColor: theme.border }]}
+                onPress={() => setEditModalVisible(false)}
+              >
+                <Text style={[styles.cancelButtonText, { color: theme.textSecondary }]}>
+                  {t.cancel}
+                </Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.saveButton, { backgroundColor: theme.primary }]}
+                onPress={saveEdit}
+              >
+                <Text style={styles.saveButtonText}>{t.save}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+}
 
   return (
     <View style={styles.container}>
@@ -353,45 +791,118 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F7FA',
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingBottom: 12,
-    backgroundColor: '#FFFFFF',
+    paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
   },
-  backButton: {
-    padding: 8,
-  },
   headerTitle: {
-    flex: 1,
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#111827',
-    marginLeft: 8,
   },
-  settingsContainer: {
+  content: {
     flex: 1,
+  },
+  profileHeader: {
+    padding: 20,
+    marginTop: 16,
+    marginHorizontal: 16,
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  profileImageContainer: {
+    marginRight: 16,
+  },
+  profileImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
+  profileImagePlaceholder: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profileImageText: {
+    color: '#FFFFFF',
+    fontSize: 32,
+    fontWeight: 'bold',
+  },
+  profileInfo: {
+    flex: 1,
+  },
+  profileName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  profileRoll: {
+    fontSize: 14,
+    marginBottom: 2,
+  },
+  profileCourse: {
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  profileSemester: {
+    fontSize: 12,
+    fontWeight: '600',
   },
   section: {
-    backgroundColor: '#FFFFFF',
     marginTop: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: '#E5E7EB',
+    marginHorizontal: 16,
+    borderRadius: 16,
+    padding: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
-    color: '#6B7280',
-    marginVertical: 12,
+    marginBottom: 16,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  infoItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  infoIcon: {
+    marginRight: 12,
+  },
+  infoTextContainer: {
+    flex: 1,
+  },
+  infoLabel: {
+    fontSize: 12,
+    marginBottom: 2,
+  },
+  infoValue: {
+    fontSize: 16,
+    fontWeight: '500',
   },
   settingItem: {
     flexDirection: 'row',
@@ -407,7 +918,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   settingIcon: {
-    marginRight: 16,
+    marginRight: 12,
   },
   settingTextContainer: {
     flex: 1,
@@ -415,20 +926,14 @@ const styles = StyleSheet.create({
   settingLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#111827',
     marginBottom: 2,
   },
   settingDescription: {
     fontSize: 14,
-    color: '#6B7280',
   },
   settingValue: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#4F46E5',
-  },
-  arrowButton: {
-    padding: 8,
   },
   languageToggle: {
     width: 64,
@@ -456,5 +961,72 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: '#4F46E5',
+  },
+  signOutItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+  },
+  signOutText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 16,
+    padding: 24,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    marginBottom: 24,
+    minHeight: 48,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    borderWidth: 1,
+  },
+  saveButton: {
+    // backgroundColor is set dynamically
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  saveButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

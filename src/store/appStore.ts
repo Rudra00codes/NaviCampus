@@ -44,10 +44,35 @@ type Notification = {
   locationId?: string;
 };
 
+type User = {
+  id: string;
+  name: string;
+  rollNumber: string;
+  email: string;
+  course: string;
+  branch: string;
+  semester: number;
+  year: number;
+  profilePhoto?: string;
+  phone?: string;
+  address?: string;
+  emergencyContact?: {
+    name: string;
+    phone: string;
+    relationship: string;
+  };
+  joinedAt: Date;
+  lastLogin?: Date;
+};
+
 type AppState = {
   // User preferences
   language: 'en' | 'hi';
   darkMode: boolean;
+  
+  // Authentication
+  isAuthenticated: boolean;
+  user: User | null;
   
   // Data
   bookmarks: Bookmark[];
@@ -60,13 +85,20 @@ type AppState = {
   // Actions
   setLanguage: (language: 'en' | 'hi') => void;
   toggleDarkMode: () => void;
+  
+  // Authentication actions
+  login: (user: User) => void;
+  logout: () => void;
+  updateUser: (updates: Partial<User>) => void;
+  
   addBookmark: (locationId: string) => void;
   removeBookmark: (id: string) => void;
   addNotification: (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => void;
   markNotificationAsRead: (id: string) => void;
   clearNotifications: () => void;
   addRecentSearch: (query: string) => void;
-  clearRecentSearches: () => void;  addClassSchedule: (schedule: Omit<ClassSchedule, 'id'>) => void;
+  clearRecentSearches: () => void;
+  addClassSchedule: (schedule: Omit<ClassSchedule, 'id'>) => void;
   removeClassSchedule: (id: string) => void;
   updateClassSchedule: (id: string, schedule: Partial<ClassSchedule>) => void;
   clearAllClassSchedules: () => void;
@@ -74,11 +106,12 @@ type AppState = {
 
 // Create the store with persistence
 export const useAppStore = create<AppState>()(
-  persist(
-    (set) => ({
+  persist(    (set) => ({
       // Initial state
       language: 'en',
       darkMode: false,
+      isAuthenticated: false,
+      user: null,
       bookmarks: [],
       classSchedule: [],
       notifications: [],
@@ -88,6 +121,26 @@ export const useAppStore = create<AppState>()(
       setLanguage: (language) => set({ language }),
       
       toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
+      
+      // Authentication actions
+      login: (user) => set({ 
+        isAuthenticated: true, 
+        user: { ...user, lastLogin: new Date() } 
+      }),
+      
+      logout: () => set({ 
+        isAuthenticated: false, 
+        user: null,
+        // Clear user-specific data on logout
+        bookmarks: [],
+        classSchedule: [],
+        notifications: [],
+        recentSearches: []
+      }),
+      
+      updateUser: (updates) => set((state) => ({
+        user: state.user ? { ...state.user, ...updates } : null
+      })),
       
       addBookmark: (locationId) => set((state) => ({
         bookmarks: [
@@ -164,4 +217,4 @@ export const useAppStore = create<AppState>()(
 );
 
 // Export types for use in components
-export type { Location, Bookmark, ClassSchedule, Notification };
+export type { Location, Bookmark, ClassSchedule, Notification, User };
