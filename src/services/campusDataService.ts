@@ -1,14 +1,15 @@
 import { Location, ClassSchedule } from '../store/appStore';
 
-// Mock locations data
+// Mock locations data for Amity University Punjab
+// Coordinates based on Sector 82 A, IT City Rd, Sahibzada Ajit Singh Nagar, Punjab 140306
 export const campusLocations: Location[] = [
   {
     id: '1',
     name: 'Main Building',
     description: 'The main administrative building of the campus',
     coordinates: {
-      latitude: 28.5456,
-      longitude: 77.2732,
+      latitude: 30.6631,
+      longitude: 76.7278,
     },
     type: 'other',
   },
@@ -17,21 +18,20 @@ export const campusLocations: Location[] = [
     name: 'Computer Science Lab',
     description: 'State-of-the-art computer science laboratory',
     coordinates: {
-      latitude: 28.5458,
-      longitude: 77.2735,
+      latitude: 30.6635,
+      longitude: 76.7282,
     },
     building: 'Engineering Block',
     floor: 2,
-    roomNumber: 'E201',
-    type: 'lab',
+    roomNumber: 'E201',    type: 'lab',
   },
   {
     id: '3',
     name: 'Library',
     description: 'Central library with study spaces and resources',
     coordinates: {
-      latitude: 28.5462,
-      longitude: 77.2730,
+      latitude: 30.6640,
+      longitude: 76.7275,
     },
     building: 'Knowledge Center',
     floor: 1,
@@ -42,8 +42,8 @@ export const campusLocations: Location[] = [
     name: 'Lecture Hall 1',
     description: 'Large lecture hall for undergraduate classes',
     coordinates: {
-      latitude: 28.5460,
-      longitude: 77.2740,
+      latitude: 30.6627,
+      longitude: 76.7285,
     },
     building: 'Academic Block A',
     floor: 1,
@@ -55,8 +55,8 @@ export const campusLocations: Location[] = [
     name: 'Physics Laboratory',
     description: 'Modern physics laboratory for experiments',
     coordinates: {
-      latitude: 28.5464,
-      longitude: 77.2738,
+      latitude: 30.6638,
+      longitude: 76.7280,
     },
     building: 'Science Block',
     floor: 3,
@@ -68,8 +68,8 @@ export const campusLocations: Location[] = [
     name: 'Cafeteria',
     description: 'Campus cafeteria with diverse food options',
     coordinates: {
-      latitude: 28.5458,
-      longitude: 77.2728,
+      latitude: 30.6625,
+      longitude: 76.7270,
     },
     building: 'Student Center',
     floor: 1,
@@ -80,8 +80,8 @@ export const campusLocations: Location[] = [
     name: 'Dean Office',
     description: 'Office of the Dean of Students',
     coordinates: {
-      latitude: 28.5456,
-      longitude: 77.2734,
+      latitude: 30.6633,
+      longitude: 76.7290,
     },
     building: 'Administration Block',
     floor: 2,
@@ -93,8 +93,8 @@ export const campusLocations: Location[] = [
     name: 'Student Counseling Center',
     description: 'Mental health and wellness counseling for students',
     coordinates: {
-      latitude: 28.5453,
-      longitude: 77.2733,
+      latitude: 30.6628,
+      longitude: 76.7288,
     },
     building: 'Wellness Center',
     floor: 1,
