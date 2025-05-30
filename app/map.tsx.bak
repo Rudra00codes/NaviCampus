@@ -118,10 +118,99 @@ export default function MapScreen() {
     }
   };
 
+  // Function to toggle between outdoor and indoor mode  // Function to calculate distances for nearby locations and sort them
+  const getNearbyLocations = () => {
+    if (!userLocation) {
+      // If no user location, return first 5 locations unsorted
+      return campusLocations.slice(0, 5);
+    }
+    
+    // Calculate distance for each location from user's position
+    const locationsWithDistance = campusLocations.map(location => {
+      const distance = calculateDistance(
+        userLocation.latitude,
+        userLocation.longitude,
+        location.coordinates.latitude,
+        location.coordinates.longitude
+      );
+      
+      return {
+        ...location,
+        distance
+      };
+    });
+    
+    // Sort by distance (closest first) and take top 5
+    return locationsWithDistance
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, 5);
+  };
+
   const toggleMode = () => {
     setMode(mode === 'outdoor' ? 'indoor' : 'outdoor');
   };
+  
+  // Function to get nearby locations sorted by distance from user
+  const getNearbyLocations = () => {
+    if (!userLocation) {
+      // If no user location, return first 5 locations unsorted
+      return campusLocations.slice(0, 5);
+    }
     
+    // Calculate distance for each location from user's position
+    const locationsWithDistance = campusLocations.map(location => {
+      const distance = calculateDistance(
+        userLocation.latitude,
+        userLocation.longitude,
+        location.coordinates.latitude,
+        location.coordinates.longitude
+      );
+      
+      return {
+        ...location,
+        distance
+      };
+    });
+    
+    // Sort by distance (closest first) and take top 5
+    return locationsWithDistance
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, 5);
+  };
+
+  // Create a type for locations with distance information
+  interface LocationWithDistance extends Location {
+    distance?: number;
+  }
+
+  // Function to get nearby locations sorted by distance from user
+  const getNearbyLocations = (): LocationWithDistance[] => {
+    if (!userLocation) {
+      // If no user location, return first 5 locations unsorted
+      return campusLocations.slice(0, 5);
+    }
+    
+    // Calculate distance for each location from user's position
+    const locationsWithDistance = campusLocations.map(location => {
+      const distance = calculateDistance(
+        userLocation.latitude,
+        userLocation.longitude,
+        location.coordinates.latitude,
+        location.coordinates.longitude
+      );
+      
+      return {
+        ...location,
+        distance
+      };
+    });
+    
+    // Sort by distance (closest first) and take top 5
+    return locationsWithDistance
+      .sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity))
+      .slice(0, 5);
+  };
+  
   const handleSearch = () => {
     if (searchQuery.trim()) {
       // For the demo, we'll just alert the search query
@@ -366,18 +455,13 @@ export default function MapScreen() {
               <Ionicons name="chevron-down" size={20} color="#6B7280" />
             </TouchableOpacity>
           </View>
-          
-          <ScrollView 
+            <ScrollView 
             horizontal
             showsHorizontalScrollIndicator={false}
             style={styles.nearbyLocationsScroll}
             contentContainerStyle={styles.nearbyLocationsContent}
           >
-            {getNearbyLocations(
-              campusLocations, 
-              userLocation?.latitude || null, 
-              userLocation?.longitude || null
-            ).map((location) => (
+            {getNearbyLocations().map((location) => (
               <TouchableOpacity 
                 key={location.id}
                 style={styles.locationCard}
@@ -400,7 +484,12 @@ export default function MapScreen() {
                   {location.name}
                 </Text>
                 <Text style={styles.locationDistance} numberOfLines={1}>
-                  {userLocation ? formatDistance(location.distance) : '--'}
+                  {/* Display actual distance if available, otherwise show a placeholder */}
+                  {location.distance 
+                    ? location.distance < 1000 
+                      ? `${Math.round(location.distance)}m` 
+                      : `${(location.distance / 1000).toFixed(1)}km`
+                    : '--'}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -554,8 +643,7 @@ const styles = StyleSheet.create({
   },
   floorButtonTextActive: {
     color: '#FFFFFF',
-  },  
-  loadingOverlay: {
+  },  loadingOverlay: {
     position: 'absolute',
     top: 70,
     alignSelf: 'center',
